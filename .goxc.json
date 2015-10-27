@@ -1,0 +1,16 @@
+{
+  "ArtifactsDest": "./pkg",
+  "Tasks": [
+    "interpolate-source",
+    "go-install",
+    "xc",
+    "copy-resources",
+    "archive-zip",
+    "archive-tar-gz",
+    "rmbin"
+  ],
+  "Arch": "amd64",
+  "BuildConstraints": "linux",
+  "PackageVersion": "0.5.1",
+  "ConfigVersion": "0.9"
+}
