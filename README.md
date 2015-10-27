@@ -19,9 +19,9 @@ To install the client, just grab it from the [releases page][1], uncompress the 
 
     # install Medidata docker-ssh-exec build tool from S3 bucket "mybucket"
     curl https://s3.amazonaws.com/mybucket/docker-ssh-exec/\
-    docker-ssh-exec_0.3.2_linux_amd64.tar.gz | \
+    docker-ssh-exec_0.5.1_linux_amd64.tar.gz | \
       tar -xz --strip-components=1 -C /usr/local/bin \
-      docker-ssh-exec_0.3.2_linux_amd64/docker-ssh-exec
+      docker-ssh-exec_0.5.1_linux_amd64/docker-ssh-exec
     mkdir -p /root/.ssh && chmod 0700 /root/.ssh
     ssh-keyscan github.com >/root/.ssh/known_hosts
 
@@ -85,4 +85,4 @@ To build it yourself, just `go get` and `go install` as usual:
 
 
 --------
-[1]: https://github.com/mdsol/12factor-tools/releases
+[1]: https://github.com/mdsol/docker-ssh-exec/releases
