@@ -1,12 +1,6 @@
 # program output from databag-env
 *.env
 
-# go build output
-databag-envdump/databag-envdump
-build12/build12
-release12/release12
-docker-ssh-exec/docker-ssh-exec
-
 # goxc build output and local config
 pkg/
 *.goxc.local.json
