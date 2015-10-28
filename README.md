@@ -13,7 +13,7 @@ This program runs in two different modes:
 ----------------
 Installation
 ----------------
-To install the server, just pull it like any other Docker image.
+To install the server, just pull `mdsol/docker-ssh-exec` like any other Docker image.
 
 To install the client, just grab it from the [releases page][1], uncompress the archive, and copy the binary to somewhere in your `$PATH`. Remember that the client is run during the `docker build...` process, so either install the client just before invoking it, or make sure it's already present in your source image. Here's an example of the code you might run in your source image, to prepare it for SSH cloning from GitHub:
 
@@ -38,6 +38,8 @@ or as an ENV var:
 
     docker run -e DOCKER-SSH-KEY="$(cat ~/.ssh/id_rsa)" --name=keyserver -d \
       mdsol/docker-ssh-exec -server
+
+The benefit of this second method is that OS X systems using a virtual Docker host cannot easily use Docker's shared volume feature with files on the OS X side. The drawback is that the kay data is exposed in the process list.
 
 Then, run a quick test of the client, to make sure it can get the key:
 
@@ -79,8 +81,8 @@ This software was created by Benton Roberts _(broberts@mdsol.com)_
 
 To build it yourself, just `go get` and `go install` as usual:
 
-    go get github.com/mdsol/12factor-tools/docker-ssh-exec
-    cd $GOPATH/src/github.com/mdsol/12factor-tools/docker-ssh-exec
+    go get github.com/mdsol/docker-ssh-exec
+    cd $GOPATH/src/github.com/mdsol/docker-ssh-exec
     go install
 
 
