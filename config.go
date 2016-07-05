@@ -8,10 +8,12 @@ import (
 )
 
 const DEFAULT_KEYPATH = `~/.ssh/id_rsa`
+const DEFAULT_PWD = `$RSA_KEY_PWD`
 
 // Represents this app's possible configuration values
 type Config struct {
 	KeyPath string
+	Pwd     string
 	Server  bool
 	Port    int
 	Wait    int
@@ -25,6 +27,7 @@ func newConfig() Config {
 		server  = flag.Bool("server", false, "run key server instead of command")
 		port    = flag.Int("port", SERVER_RECV_PORT, "server receiving port")
 		wait    = flag.Int("wait", CLIENT_TIMEOUT, "client timeout, in seconds")
+		pwd     = flag.String("pwd", DEFAULT_PWD, "password for encrypted RSA key")
 	)
 	flag.Parse()
 	if *print_v {
@@ -45,9 +48,14 @@ func newConfig() Config {
 		}
 		keyPath = filepath.Join(home, `.ssh`, `id_rsa`)
 	}
+	rsaPasswd := *pwd
+	if *pwd == DEFAULT_PWD {
+		rsaPasswd = os.Getenv(`RSA_KEY_PWD`)
+	}
 	return Config{
 		Server:  *server,
 		KeyPath: keyPath,
+		Pwd:     rsaPasswd,
 		Port:    *port,
 		Wait:    *wait,
 	}

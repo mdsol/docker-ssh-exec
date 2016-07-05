@@ -15,8 +15,8 @@ const (
 )
 
 // Package version & timestamp - interpolated by goxc
-const VERSION = "0.5.1"
-const SOURCE_DATE = "2015-10-27T10:48:34-04:00"
+const VERSION = "0.5.2"
+const SOURCE_DATE = "2016-07-04T21:46:43-07:00"
 
 func main() {
 	config := newConfig()

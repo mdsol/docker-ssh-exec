@@ -58,6 +58,8 @@ Here's the command-line help:
           path to key file (default "~/.ssh/id_rsa")
       -port int
           server receiving port (default 1067)
+      -pwd string
+          password for encrypted RSA key
       -server
           run key server instead of command
       -version

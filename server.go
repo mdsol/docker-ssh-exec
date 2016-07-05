@@ -1,10 +1,13 @@
 package main
 
 import (
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"io/ioutil"
 	"net"
 	"os"
+	"regexp"
 )
 
 func server(config Config) {
@@ -33,19 +36,33 @@ func server(config Config) {
 				IP:   clientAddr.IP,
 				Port: clientAddr.Port + 1,
 			})
-
-			response := os.Getenv(KEY_DATA_ENV_VAR)
-			if response == `` {
-				keyData, err := ioutil.ReadFile(config.KeyPath)
-				if err == nil {
-					response = string(keyData)
-				} else {
-					response = fmt.Sprintf("ERROR reading keyfile %s: %s!",
-						config.KeyPath, err)
-					fmt.Println(response)
+			var keyData []byte
+			keyData = []byte(os.Getenv(KEY_DATA_ENV_VAR))
+			if len(keyData) == 0 {
+				keyData, err = ioutil.ReadFile(config.KeyPath)
+				if err != nil {
+					fmt.Printf("ERROR reading keyfile %s: %s!\n", config.KeyPath, err)
 				}
 			}
-			_, err = writeSocket.Write([]byte(response))
+			pemBlock, _ := pem.Decode(keyData)
+			if pemBlock != nil {
+				if x509.IsEncryptedPEMBlock(pemBlock) {
+					fmt.Println("Decrypting private key with passphrase...")
+					decoded, err := x509.DecryptPEMBlock(pemBlock, []byte(config.Pwd))
+					if err == nil {
+						header := `PRIVATE KEY` // default key type in header
+						matcher := regexp.MustCompile("-----BEGIN (.*)-----")
+						if matches := matcher.FindSubmatch(keyData); len(matches) > 1 {
+							header = string(matches[1])
+						}
+						keyData = pem.EncodeToMemory(
+							&pem.Block{Type: header, Bytes: decoded})
+					} else {
+						fmt.Printf("Error decrypting PEM-encoded secret: %s\n", err)
+					}
+				}
+			}
+			_, err = writeSocket.Write(keyData)
 			if err != nil {
 				fmt.Printf("ERROR writing data to socket:%s!\n", err)
 			}
