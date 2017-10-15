@@ -6,5 +6,6 @@ RUN go build -ldflags '-w -s' -a -installsuffix cgo -o /docker-ssh-exec
 
 FROM scratch as runtime
 COPY --from=builder /docker-ssh-exec /docker-ssh-exec
+ENV HOME=/root
 EXPOSE 80
 ENTRYPOINT ["/docker-ssh-exec"]

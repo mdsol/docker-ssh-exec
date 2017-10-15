@@ -5,6 +5,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"os"
 	"regexp"
@@ -52,9 +53,10 @@ func readKeyData(config *Config) *[]byte {
 	var err error
 	keyData := []byte(os.Getenv(KEY_DATA_ENV_VAR))
 	if len(keyData) == 0 {
+		fmt.Printf("Reading file: %s...\n", config.KeyPath)
 		keyData, err = ioutil.ReadFile(config.KeyPath)
 		if err != nil {
-			fmt.Printf("ERROR reading keyfile %s: %s!\n", config.KeyPath, err)
+			log.Fatalf("ERROR reading keyfile %s: %s!\n", config.KeyPath, err)
 		}
 	}
 	pemBlock, _ := pem.Decode(keyData)
