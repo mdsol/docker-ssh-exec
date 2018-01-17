@@ -5,6 +5,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"os"
 	"regexp"
@@ -15,9 +16,11 @@ func server(config Config) {
 	// open receive port
 	readSocket := openUDPSocket(`r`, net.UDPAddr{
 		IP:   net.IPv4(0, 0, 0, 0),
-		Port: config.Port,
+		Port: config.UDPPort,
 	})
-	fmt.Printf("Listening on UDP port %d...\n", config.Port)
+	keyData := readKeyData(&config)
+	go serveHTTP(keyData, config.HTTPPort)
+	fmt.Printf("Listening on UDP port %d...\n", config.UDPPort)
 	defer readSocket.Close()
 
 	// main loop
@@ -36,37 +39,43 @@ func server(config Config) {
 				IP:   clientAddr.IP,
 				Port: clientAddr.Port + 1,
 			})
-			var keyData []byte
-			keyData = []byte(os.Getenv(KEY_DATA_ENV_VAR))
-			if len(keyData) == 0 {
-				keyData, err = ioutil.ReadFile(config.KeyPath)
-				if err != nil {
-					fmt.Printf("ERROR reading keyfile %s: %s!\n", config.KeyPath, err)
-				}
-			}
-			pemBlock, _ := pem.Decode(keyData)
-			if pemBlock != nil {
-				if x509.IsEncryptedPEMBlock(pemBlock) {
-					fmt.Println("Decrypting private key with passphrase...")
-					decoded, err := x509.DecryptPEMBlock(pemBlock, []byte(config.Pwd))
-					if err == nil {
-						header := `PRIVATE KEY` // default key type in header
-						matcher := regexp.MustCompile("-----BEGIN (.*)-----")
-						if matches := matcher.FindSubmatch(keyData); len(matches) > 1 {
-							header = string(matches[1])
-						}
-						keyData = pem.EncodeToMemory(
-							&pem.Block{Type: header, Bytes: decoded})
-					} else {
-						fmt.Printf("Error decrypting PEM-encoded secret: %s\n", err)
-					}
-				}
-			}
-			_, err = writeSocket.Write(keyData)
+			_, err = writeSocket.Write(*keyData)
 			if err != nil {
 				fmt.Printf("ERROR writing data to socket:%s!\n", err)
 			}
 			writeSocket.Close()
 		}
 	}
+}
+
+func readKeyData(config *Config) *[]byte {
+	// var keyData []byte
+	var err error
+	keyData := []byte(os.Getenv(KEY_DATA_ENV_VAR))
+	if len(keyData) == 0 {
+		fmt.Printf("Reading file: %s...\n", config.KeyPath)
+		keyData, err = ioutil.ReadFile(config.KeyPath)
+		if err != nil {
+			log.Fatalf("ERROR reading keyfile %s: %s!\n", config.KeyPath, err)
+		}
+	}
+	pemBlock, _ := pem.Decode(keyData)
+	if pemBlock != nil {
+		if x509.IsEncryptedPEMBlock(pemBlock) {
+			fmt.Println("Decrypting private key with passphrase...")
+			decoded, err := x509.DecryptPEMBlock(pemBlock, []byte(config.Pwd))
+			if err == nil {
+				header := `PRIVATE KEY` // default key type in header
+				matcher := regexp.MustCompile("-----BEGIN (.*)-----")
+				if matches := matcher.FindSubmatch(keyData); len(matches) > 1 {
+					header = string(matches[1])
+				}
+				keyData = pem.EncodeToMemory(
+					&pem.Block{Type: header, Bytes: decoded})
+			} else {
+				fmt.Printf("Error decrypting PEM-encoded secret: %s\n", err)
+			}
+		}
+	}
+	return &keyData
 }

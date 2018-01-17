@@ -11,6 +11,3 @@ docker run --rm -it -v "$GOPATH":/gopath -v "$(pwd)":/app -e "GOPATH=/gopath" \
 
 echo "Building docker image for docker-ssh-exec..."
 docker build --no-cache=true --tag mdsol/docker-ssh-exec .
-rm -f pkg/docker-ssh-exec
-
-exit 0

@@ -19,7 +19,7 @@ func client(config Config) {
 	// open send port
 	writeSocket := openUDPSocket(`w`, net.UDPAddr{
 		IP:   net.IPv4(255, 255, 255, 255), // (broadcast IPv4)
-		Port: config.Port,
+		Port: config.UDPPort,
 	})
 	defer writeSocket.Close()
 

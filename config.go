@@ -12,22 +12,24 @@ const DEFAULT_PWD = `$RSA_KEY_PWD`
 
 // Represents this app's possible configuration values
 type Config struct {
-	KeyPath string
-	Pwd     string
-	Server  bool
-	Port    int
-	Wait    int
+	KeyPath  string
+	Pwd      string
+	Server   bool
+	UDPPort  int
+	HTTPPort int
+	Wait     int
 }
 
 // Generates and returns a new Config based on the command-line
 func newConfig() Config {
 	var (
-		keyArg  = flag.String("key", DEFAULT_KEYPATH, "path to key file")
-		print_v = flag.Bool("version", false, "print version and exit")
-		server  = flag.Bool("server", false, "run key server instead of command")
-		port    = flag.Int("port", SERVER_RECV_PORT, "server receiving port")
-		wait    = flag.Int("wait", CLIENT_TIMEOUT, "client timeout, in seconds")
-		pwd     = flag.String("pwd", DEFAULT_PWD, "password for encrypted RSA key")
+		keyArg   = flag.String("key", DEFAULT_KEYPATH, "path to key file")
+		print_v  = flag.Bool("version", false, "print version and exit")
+		server   = flag.Bool("server", false, "run key server instead of command")
+		udpPort  = flag.Int("port", SERVER_RECV_PORT, "server UDP receiving port")
+		httpPort = flag.Int("http", 80, "server HTTP server port")
+		wait     = flag.Int("wait", CLIENT_TIMEOUT, "client timeout, in seconds")
+		pwd      = flag.String("pwd", DEFAULT_PWD, "password for encrypted RSA key")
 	)
 	flag.Parse()
 	if *print_v {
@@ -53,10 +55,11 @@ func newConfig() Config {
 		rsaPasswd = os.Getenv(`RSA_KEY_PWD`)
 	}
 	return Config{
-		Server:  *server,
-		KeyPath: keyPath,
-		Pwd:     rsaPasswd,
-		Port:    *port,
-		Wait:    *wait,
+		Server:   *server,
+		KeyPath:  keyPath,
+		Pwd:      rsaPasswd,
+		UDPPort:  *udpPort,
+		HTTPPort: *httpPort,
+		Wait:     *wait,
 	}
 }
