@@ -75,6 +75,36 @@ Known Limitations / Bugs
 ----------------
 The key data is limited to 4096 bytes.
 
+On macOS 10.14 or later, the default format of `ssh-keygen` will produce
+an "OpenSSH private key" ([reference][2]). For example:
+
+```
+$ ssh-keygen -t rsa -b 4096 -C "...@email.com" -f ~/.ssh/before_rsa
+Generating public/private rsa key pair.
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in ${HOME}/.ssh/before_rsa.
+Your public key has been saved in ${HOME}/.ssh/before_rsa.pub.
+The key fingerprint is:
+...
+$ head -2 ~/.ssh/before_rsa
+-----BEGIN OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAACmFlczI1Ni1jdHIAAAAGYmNyeXB0AAAAGAAAABAZOJlIwH
+```
+
+To use a passphrase, this library requires an actual "RSA private key".
+To make `ssh-keygen` produce one, use the `-m` (key format) flag:
+
+```
+$ ssh-keygen -t rsa -b 4096 -C "...@email.com" -f ~/.ssh/after_rsa -m PEM
+...
+$ head -5 ~/.ssh/after_rsa
+-----BEGIN RSA PRIVATE KEY-----
+Proc-Type: 4,ENCRYPTED
+DEK-Info: AES-128-CBC,70B1F7ECFCC66C9DF073996B92D3C01E
+
+GNhm2zcN6oz+K9yZimDMx6w5PD+mDz7ylVulz+PnYVP5TVs4yZuVZF3GGlu/NYZ1
+```
 
 ----------------
 Contribution / Development
@@ -90,3 +120,4 @@ To build it yourself, just `go get` and `go install` as usual:
 
 --------
 [1]: https://github.com/mdsol/docker-ssh-exec/releases
+[2]: https://serverfault.com/q/939909/167925
